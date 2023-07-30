@@ -4,5 +4,6 @@ ThisBuild / scalaVersion := "2.13.11"
 
 lazy val root = (project in file("."))
   .settings(
-    name := "review-ranker"
+    name := "review-ranker",
+    libraryDependencies ++= Dependencies.AKKA_DEPENDENCIES
   )
