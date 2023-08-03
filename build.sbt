@@ -6,4 +6,5 @@ lazy val root = (project in file("."))
   .settings(
     name := "review-ranker",
     libraryDependencies ++= Dependencies.AKKA_DEPENDENCIES
+      ++ Dependencies.CIRCE_DEPENDENCIES
   )
