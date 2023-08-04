@@ -5,16 +5,15 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.model.HttpResponse
-import akka.stream.Materializer
-import com.reviewranker.entities.CategoriesResponse
+import com.reviewranker.entities.CategoryResponse
 import com.reviewranker.entities.Category
-import io.circe.Decoder
-import io.circe.Error
-import io.circe.generic.auto._
-import io.circe.generic.semiauto.deriveDecoder
-import io.circe.jawn.decode
+import com.reviewranker.entities.Domain
+import com.reviewranker.entities.DomainResponse
+import com.reviewranker.util.parser.JsonParserInstances._
+import com.reviewranker.util.parser.Json
 
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
@@ -32,40 +31,67 @@ object Fetcher {
 
   final case class CategoriesFetched(categories: List[Category]) extends Event
 
-  final case class DomainsFetched(domains: List[String]) extends Event
+  final case class DomainsFetched(domains: List[Domain]) extends Event
 
   final case class TrafficFetched(traffic: List[String]) extends Event
 
-  private def pullCategories(name: String)(implicit system: ActorSystem[Nothing]): Future[HttpResponse] = {
-    Http().singleRequest(HttpRequest(uri = SearchCategoriesUrl + name))
+  private def pullCategories(name: String)(implicit system: ActorSystem[Nothing]): Future[List[Category]] = {
+    implicit val execContext = system.executionContext
+    val categoriesFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(uri = s"$SearchCategoriesUrl".format(name)))
+
+    categoriesFuture
+      .flatMap(toStrictEntity)
+      .map { strictEntity =>
+        val json = strictEntity.data.utf8String
+        val resp = Json.decode[CategoryResponse](json)
+
+        resp.categories
+      }
+  }
+
+  private def pullDomains(categories: List[Category])(implicit system: ActorSystem[Nothing]): Future[List[Domain]] = {
+    implicit val execContext = system.executionContext
+    val sortParam = "latest_review"
+
+    val domainFutures = categories.map { c =>
+      val domainsFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(uri = s"$SearchDomainsByCategoryUrl".format(c.categoryId, sortParam)))
+      domainsFuture
+        .flatMap(toStrictEntity)
+        .map { strictEntity =>
+          val json = strictEntity.data.utf8String
+          val resp = Json.decode[DomainResponse](json)
+
+          resp.recentlyReviewedBusinessUnits
+        }
+    }
+
+    Future.sequence(domainFutures).map(_.flatten)
+  }
+
+  private def toStrictEntity(resp: HttpResponse)(implicit system: ActorSystem[Nothing]): Future[HttpEntity.Strict] = {
+    val timeout = 300.millis
+
+    resp.entity.toStrict(timeout)
   }
 
   def apply(): Behavior[Command] =
     Behaviors.receive { (context, message) =>
+      implicit val system = context.system
+      implicit val execContext = system.executionContext
+
       message match {
         case FetchCategoriesByName(name, replyTo) =>
-          implicit val system = context.system
-          implicit val execContext = system.executionContext
-          implicit val materializer: Materializer = Materializer(system)
           val categoriesFuture = pullCategories(name)
-          categoriesFuture.flatMap { response =>
-            val timeout = 300.millis
-            response.entity.toStrict(timeout)
-          }.map { strictEntity =>
-            implicit val categoriesResponseDecoder: Decoder[CategoriesResponse] = deriveDecoder[CategoriesResponse]
-            val body = strictEntity.data.utf8String
 
-            val decoded: Either[Error, CategoriesResponse] = decode[CategoriesResponse](body)
+          categoriesFuture.map(replyTo ! CategoriesFetched(_))
 
-            decoded match {
-              case Left(ex) =>
-                throw new IllegalArgumentException(s"Invalid JSON object: ${ex.getMessage}")
-              case Right(categoriesResp) =>
-                replyTo ! CategoriesFetched(categoriesResp.categories)
-            }
-          }
+          Behaviors.same
+        case FetchDomainsByCategories(categories, replyTo) =>
+          val domainsFuture = pullDomains(categories)
+
+          domainsFuture.map(replyTo ! DomainsFetched(_))
+
           Behaviors.same
       }
-
     }
 }
