@@ -1,4 +1,4 @@
-package com.reviewranker.entities
+package com.reviewranker.entity
 
 case class Domain(businessUnitId: String,
                   displayName: String,

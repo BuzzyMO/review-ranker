@@ -1,4 +1,4 @@
-package com.reviewranker.entities
+package com.reviewranker.entity
 
 case class Review(id: String,
                   rating: Byte,
