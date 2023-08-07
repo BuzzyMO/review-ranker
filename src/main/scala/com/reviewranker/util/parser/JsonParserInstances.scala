@@ -1,7 +1,7 @@
 package com.reviewranker.util.parser
 
-import com.reviewranker.entities.CategoryResponse
-import com.reviewranker.entities.DomainResponse
+import com.reviewranker.entity.CategoryResponse
+import com.reviewranker.entity.DomainResponse
 import io.circe.Decoder
 import io.circe.Json
 import io.circe.generic.auto._
