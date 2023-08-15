@@ -23,7 +23,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 
 object Fetcher {
-  val MonthlyVisitsID = "#MONTHLY_VISITS"
+  val MonthlyVisitsID = "MONTHLY_VISITS"
 
   sealed trait Command
 
@@ -90,7 +90,7 @@ object Fetcher {
     Future.sequence(trafficFutures)
   }
 
-  private def pullTraffic(domain: Domain)(implicit system: ActorSystem[Nothing]): Future[String] = {
+  private def pullTraffic(domain: Domain)(implicit system: ActorSystem[Nothing]): Future[Int] = {
     implicit val execContext = system.executionContext
     val sessionCookie = HttpCookiePair(TrafficSessionName, TrafficSessionCookie)
     val reqHeaders = Seq(Cookie(sessionCookie))
@@ -99,7 +99,7 @@ object Fetcher {
         uri = s"$TrafficUrl".format(domain.identifyingName),
         headers = reqHeaders)
     )
-
+    val visitAttr = "data-smvisits"
 
     trafficFuture
       .flatMap(toStrictEntity)
@@ -109,7 +109,7 @@ object Fetcher {
 
         val mVisitsEl = doc.getElementById(MonthlyVisitsID)
 
-        mVisitsEl.text()
+        mVisitsEl.attributes().get(visitAttr).toInt
       }
   }
 
