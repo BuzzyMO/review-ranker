@@ -11,10 +11,7 @@ import akka.http.scaladsl.model.HttpResponse
 import akka.http.scaladsl.model.headers.Cookie
 import akka.http.scaladsl.model.headers.HttpCookiePair
 import com.reviewranker.dto.DomainDto
-import com.reviewranker.entity.CategoryResponse
-import com.reviewranker.entity.Category
-import com.reviewranker.entity.Domain
-import com.reviewranker.entity.DomainResponse
+import com.reviewranker.entity.{Category, CategoryResponse, Domain, DomainResponse}
 import com.reviewranker.util.parser.JsonParserInstances._
 import com.reviewranker.util.parser.Json
 import org.jsoup.Jsoup
@@ -40,6 +37,8 @@ object Fetcher {
   final case class DomainsFetched(domains: List[Domain]) extends Event
 
   final case class TrafficFetched(domains: List[DomainDto]) extends Event
+
+  final case class Timeout() extends Event
 
   private def pullCategories(name: String)(implicit system: ActorSystem[Nothing]): Future[List[Category]] = {
     implicit val execContext = system.executionContext
@@ -94,12 +93,12 @@ object Fetcher {
     implicit val execContext = system.executionContext
     val sessionCookie = HttpCookiePair(TrafficSessionName, TrafficSessionCookie)
     val reqHeaders = Seq(Cookie(sessionCookie))
+    val visitAttr = "data-smvisits"
     val trafficFuture: Future[HttpResponse] = Http().singleRequest(
       HttpRequest(
         uri = s"$TrafficUrl".format(domain.identifyingName),
         headers = reqHeaders)
     )
-    val visitAttr = "data-smvisits"
 
     trafficFuture
       .flatMap(toStrictEntity)
