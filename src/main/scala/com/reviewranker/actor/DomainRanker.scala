@@ -22,7 +22,7 @@ object DomainRanker {
           Behaviors.same
         case TrafficFetched(domains) =>
           domains
-            .sortBy(d => (d.domain.numberOfReviews, d.traffic))
+            .sortBy(d => (d.domain.numberOfReviews, d.traffic))(Ordering[(Int, Int)].reverse)
             .foreach(d => println(s"${d.domain.identifyingName} - ${d.domain.numberOfReviews} - ${d.traffic} - ${d.domain.review.text}"))
 
           Behaviors.withTimers { timers =>
