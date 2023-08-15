@@ -4,9 +4,6 @@ import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
 import com.reviewranker.actor.Fetcher._
 
-import scala.concurrent.duration.DurationInt
-import scala.language.postfixOps
-
 object DomainRanker {
 
   def apply(): Behavior[Fetcher.Event] = {
@@ -29,7 +26,7 @@ object DomainRanker {
             .foreach(d => println(s"${d.domain.identifyingName} - ${d.domain.numberOfReviews} - ${d.traffic} - ${d.domain.review.text}"))
 
           Behaviors.withTimers { timers =>
-            timers.startTimerWithFixedDelay(Timeout(), 5 seconds)
+            timers.startTimerWithFixedDelay(Timeout(), UpdateDataDelay)
 
             Behaviors.same
           }
