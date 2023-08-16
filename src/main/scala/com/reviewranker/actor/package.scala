@@ -12,4 +12,5 @@ package object actor {
   val TrafficSessionName = "vstat_session"
   val TrafficSessionCookie = "ErJt7YU24evVK9RUNNqcn95FhC5yai0jHAHmnVwN"
   val UpdateDataDelay: FiniteDuration = 5 minutes
+  val DomainsLimit = 10
 }

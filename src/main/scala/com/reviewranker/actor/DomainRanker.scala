@@ -17,7 +17,9 @@ object DomainRanker {
 
           Behaviors.same
         case DomainsFetched(domains) =>
-          f ! FetchTrafficForDomains(domains, context.self)
+          val limitedDomains = domains.take(DomainsLimit)
+
+          f ! FetchTrafficForDomains(limitedDomains, context.self)
 
           Behaviors.same
         case TrafficFetched(domains) =>
