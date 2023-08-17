@@ -25,7 +25,8 @@ object DomainRanker {
         case TrafficFetched(domains) =>
           domains
             .sortBy(d => (d.domain.numberOfReviews, d.traffic))(Ordering[(Int, Int)].reverse)
-            .foreach(d => println(s"${d.domain.identifyingName} - ${d.domain.numberOfReviews} - ${d.traffic} - ${d.domain.review.text}"))
+            .foreach(d => println(s"${d.domain.identifyingName} - Total reviews: ${d.domain.numberOfReviews} - " +
+              s"Traffic: ${d.traffic} - Last Review: ${d.domain.review.text}"))
 
           Behaviors.withTimers { timers =>
             timers.startTimerWithFixedDelay(Timeout(), UpdateDataDelay)
