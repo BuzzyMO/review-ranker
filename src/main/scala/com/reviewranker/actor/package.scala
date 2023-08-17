@@ -6,7 +6,7 @@ import scala.language.postfixOps
 package object actor {
   val SearchCategoryName = "store"
   val SearchCategoriesUrl = "https://www.trustpilot.com/api/consumersitesearch-api/categories/search?country=US&locale=en-US&query=%s"
-  val ConsumerSiteId = 3718
+  val ConsumerSiteId = 3720
   val SearchDomainsByCategoryUrl = s"https://www.trustpilot.com/_next/data/categoriespages-consumersite-$ConsumerSiteId/categories/%s.json?sort=%s"
   val TrafficUrl = "https://web.vstat.info/%s"
   val TrafficSessionName = "vstat_session"
