@@ -9,13 +9,10 @@ object DomainRanker {
   def apply(): Behavior[Fetcher.Event] = {
     Behaviors.setup({ context =>
       val f = context.spawn(Fetcher(), "fetcher")
-      f ! FetchCategoriesByName(SearchCategoryName, context.self)
+      val categoryIds = JewelryStoreId :: ElectronicsStoreId :: FurnitureStoreId :: Nil
+      f ! FetchDomainsByCategories(categoryIds, context.self)
 
       Behaviors.receiveMessage {
-        case CategoriesFetched(categories) =>
-          f ! FetchDomainsByCategories(categories, context.self)
-
-          Behaviors.same
         case DomainsFetched(domains) =>
           val limitedDomains = domains.take(DomainsLimit)
 
@@ -34,7 +31,7 @@ object DomainRanker {
             Behaviors.same
           }
         case Timeout() =>
-          f ! FetchCategoriesByName(SearchCategoryName, context.self)
+          f ! FetchDomainsByCategories(categoryIds, context.self)
 
           Behaviors.same
       }

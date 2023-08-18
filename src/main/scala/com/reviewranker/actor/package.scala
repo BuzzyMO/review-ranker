@@ -4,8 +4,9 @@ import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.language.postfixOps
 
 package object actor {
-  val SearchCategoryName = "store"
-  val SearchCategoriesUrl = "https://www.trustpilot.com/api/consumersitesearch-api/categories/search?country=US&locale=en-US&query=%s"
+  val JewelryStoreId = "jewelry_store"
+  val ElectronicsStoreId = "electronics_store"
+  val FurnitureStoreId = "furniture_store"
   val ConsumerSiteId = 3720
   val SearchDomainsByCategoryUrl = s"https://www.trustpilot.com/_next/data/categoriespages-consumersite-$ConsumerSiteId/categories/%s.json?sort=%s"
   val TrafficUrl = "https://web.vstat.info/%s"
