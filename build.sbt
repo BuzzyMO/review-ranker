@@ -9,4 +9,5 @@ lazy val root = (project in file("."))
       Dependencies.AKKA_DEPENDENCIES
         ++ Dependencies.CIRCE_DEPENDENCIES
         :+ Dependencies.JSOUP_DEPENDENCY
+        :+ Dependencies.LOGBACK_DEPENDENCY
   )

@@ -5,6 +5,7 @@ object Dependencies {
   val AKKA_HTTP_VERSION = "10.5.0"
   val CIRCE_VERSION = "0.14.1"
   val JSOUP_VERSION = "1.15.4"
+  val LOGBACK_VERSION = "1.4.7"
 
   val AKKA_DEPENDENCIES = Seq(
     "com.typesafe.akka" %% "akka-actor-typed" % AKKA_VERSION,
@@ -19,4 +20,5 @@ object Dependencies {
   ).map(_ % CIRCE_VERSION)
 
   val JSOUP_DEPENDENCY = "org.jsoup" % "jsoup" % JSOUP_VERSION
+  val LOGBACK_DEPENDENCY = "ch.qos.logback" % "logback-classic" % LOGBACK_VERSION
 }

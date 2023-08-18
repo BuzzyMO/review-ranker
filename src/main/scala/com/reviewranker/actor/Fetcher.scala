@@ -104,15 +104,20 @@ object Fetcher {
     Behaviors.receive { (context, message) =>
       implicit val system = context.system
       implicit val execContext = system.executionContext
+      val log = context.system.log
 
       message match {
         case FetchDomainsByCategories(categories, replyTo) =>
+          log.info("Fetch domains started")
+
           val domainsFuture = pullDomains(categories)
 
           domainsFuture.map(replyTo ! DomainsFetched(_))
 
           Behaviors.same
         case FetchTrafficForDomains(domains, replyTo) =>
+          log.info("Fetch traffic started")
+
           val trafficFuture = pullTraffic(domains)
 
           trafficFuture.map(replyTo ! TrafficFetched(_))
