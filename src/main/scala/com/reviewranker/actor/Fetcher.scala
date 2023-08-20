@@ -65,7 +65,7 @@ object Fetcher {
     val trafficFutures = domains.map { d =>
       val trafficFuture = pullTraffic(d)
 
-      trafficFuture.map(t => DomainDto(d, t))
+      trafficFuture.map(t => DomainDto(d, traffic = t))
     }
 
     Future.sequence(trafficFutures)
